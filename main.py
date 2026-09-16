@@ -1,6 +1,6 @@
 import argparse
 
-#from view_image import view_image
+from view_image import view_image
 #from compute_mIP_MIP import compute_projection
 #from show_image_stats import show_stats
 #from denoise_image import denoise_image
@@ -28,6 +28,18 @@ def main():
         required=True,
         help="Path to the image"
     )
+    parser_view.add_argument(
+        "--flip",
+        choices=["yes", "no"],
+        required=False,
+        default="no"
+    )
+
+    # parser_view.add_argument(
+    #     "--slice",
+    #     choices=["axiale", "coronale", "sagittale"],
+    #     default="axiale"
+    # )
 
     # ---
     # Pour compute_mIP-MIP.py
@@ -43,16 +55,15 @@ def main():
     )
 
     parser_proj.add_argument(
-        "--axis",
-        type=int,
-        choices=[0, 1, 2],
-        required=True
+     "--axis",
+        choices=["x", "y", "z"],
+        default="x"
     )
 
     parser_proj.add_argument(
         "--mode",
         choices=["max", "min"],
-        required=True
+        default="max",
     )
 
     # ---
@@ -83,8 +94,8 @@ def main():
 
     args = parser.parse_args()
 
-    # if args.command == "view":
-    #     view_image(args.image)
+    if args.command == "view":
+         view_image(args.image, args.flip)
     #
     # elif args.command == "projection":
     #     compute_projection(
@@ -100,6 +111,6 @@ def main():
     #     denoise_image(args.image)
 
 
-    if __name__ == "__main__":
-        main()
+if __name__ == "__main__":
+    main()
 
