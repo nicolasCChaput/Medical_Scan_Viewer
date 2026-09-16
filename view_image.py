@@ -13,10 +13,33 @@ def view_image(image_path):
     if suffix != ".nii":
         raise Exception(f"Provided file is not a .nii file. Provided file format: {suffix}")
 
-    # --- Setup initial du viewer ---
+    # --- Setup générale du viewer ---
 
     fig, axes = plt.subplots(1, 3, figsize=(15, 5))
     plt.subplots_adjust(bottom=0.30) # Espace pour les sliders sous les images
+
+    # Setup d'une grille pour obtenir ce format de visuel
+    #_____________
+    #|img|img|img|
+    #_____________
+    #|sld|sld|sld|
+    #_____________
+
+    grid = fig.add_gridspec (
+        nrows = 2,
+        ncols = 3,
+        height_ratios = [15, 1]
+    )
+
+    # Placer les images dans le haut de la grille
+    pos_img_sag = fig.add_subplot(grid[0,0])
+    pos_img_coro = fig.add_subplot(grid[0,1])
+    pos_img_axia = fig.add_subplot(grid[0,2])
+
+    # Placer les slider dans le bas de la grille
+    pos_sld_sag = fig.add_subplot(grid[1,0])
+    pos_sld_coro = fig.add_subplot(grid[1,1])
+    pos_sld_axia = fig.add_subplot(grid[1,2])
 
     # --- Setup des données des images ---
 
@@ -37,25 +60,30 @@ def view_image(image_path):
     coro = np.flipud(coro)
     axia = np.flipud(axia)
 
+    # --- Setup de la présentation des images dans leur grille ---
+
     # Sagittale
-    sag_img = axes[0].imshow(sag, aspect="auto")
+    sag_img = pos_img_sag.imshow(sag, aspect="auto")
     axes[0].set_title("Sagittale")
+    axes[0].axis("off")
 
     # Coronale
-    coro_img = axes[1].imshow(coro, aspect="auto")
+    coro_img = pos_img_coro.imshow(coro, aspect="auto")
     axes[1].set_title("Coronale")
+    axes[1].axis("off")
 
     # Axiale
-    axia_img = axes[2].imshow(axia, aspect="auto")
+    axia_img = pos_img_axia.imshow(axia, aspect="auto")
     axes[2].set_title("Axiale")
+    axes[2].axis("off")
 
-    # --- Setup des sliders sous les images
+    # --- Setup des sliders sous les images et dans leurs grille ---
 
     # Slider Coupe Sagittale
-    x_slider_visual = fig.add_axes([0.15, 0.20, 0.7, 0.03])
+    # x_slider_visual = fig.add_axes([0.15, 0.20, 0.7, 0.03])
     x_slider = Slider(
-        ax = x_slider_visual,
-        label = "Coupe Sagittale",
+        ax = pos_sld_sag,
+        label = "",
         valmin = 0,
         valmax = data.shape[0] - 1,
         valinit = initial_x,
@@ -63,10 +91,10 @@ def view_image(image_path):
     )
 
     # Slider Coupe Coronale
-    y_slider_visual = fig.add_axes([0.15, 0.14, 0.7, 0.03])
+    # y_slider_visual = fig.add_axes([0.15, 0.14, 0.7, 0.03])
     y_slider = Slider(
-        ax = y_slider_visual,
-        label = "Coupe Coronale",
+        ax = pos_sld_coro,
+        label = "",
         valmin = 0,
         valmax = data.shape[1] - 1,
         valinit=initial_y,
@@ -74,10 +102,10 @@ def view_image(image_path):
     )
 
     # Slider Coupe Axiale
-    z_slider_visual = fig.add_axes([0.15, 0.08, 0.7, 0.03])
+    # z_slider_visual = fig.add_axes([0.15, 0.08, 0.7, 0.03])
     z_slider = Slider(
-        ax = z_slider_visual,
-        label = "Coupe Axiale",
+        ax = pos_sld_axia,
+        label = "",
         valmin = 0,
         valmax = data.shape[2] - 1,
         valinit = initial_z,
