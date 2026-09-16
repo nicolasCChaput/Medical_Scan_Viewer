@@ -19,11 +19,11 @@ def view_image(image_path):
     plt.subplots_adjust(bottom=0.30) # Espace pour les sliders sous les images
 
     # Setup d'une grille pour obtenir ce format de visuel
-    #_____________
+    #|___________|
     #|img|img|img|
-    #_____________
+    #|___________|
     #|sld|sld|sld|
-    #_____________
+    #|___________|
 
     grid = fig.add_gridspec (
         nrows = 2,
@@ -61,6 +61,7 @@ def view_image(image_path):
     axia = np.flipud(axia)
 
     # --- Setup de la présentation des images dans leur grille ---
+    # Note: aspect à "auto" semble être le mieux ig pour la visualisation
 
     # Sagittale
     sag_img = pos_img_sag.imshow(sag, aspect="auto")
