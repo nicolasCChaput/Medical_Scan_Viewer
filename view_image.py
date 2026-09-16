@@ -7,7 +7,7 @@ from pathlib import Path
 from matplotlib.widgets import Slider
 
 
-def view_image(image_path):
+def view_image(image_path, flip):
 
     suffix = Path(image_path).suffix
     if suffix != ".nii":
@@ -16,7 +16,7 @@ def view_image(image_path):
     # --- Setup générale du viewer ---
 
     fig, axes = plt.subplots(1, 3, figsize=(15, 5))
-    plt.subplots_adjust(bottom=0.30) # Espace pour les sliders sous les images
+    plt.subplots_adjust(bottom=0.10) # Espace pour les sliders sous les images
 
     # Setup d'une grille pour obtenir ce format de visuel
     #|___________|
@@ -56,9 +56,10 @@ def view_image(image_path):
     axia = data[:, :, initial_z].T
 
     # Flip up-down
-    sag = np.flipud(sag)
-    coro = np.flipud(coro)
-    axia = np.flipud(axia)
+    if flip == "yes":
+        sag = np.flipud(sag)
+        coro = np.flipud(coro)
+        axia = np.flipud(axia)
 
     # --- Setup de la présentation des images dans leur grille ---
     # Note: aspect à "auto" semble être le mieux ig pour la visualisation
@@ -118,9 +119,19 @@ def view_image(image_path):
         new_y = y_slider.val
         new_z = z_slider.val
 
-        sag_img.set_data(np.flipud(data[new_x, :, :].T))
-        coro_img.set_data(np.flipud(data[:, new_y, :].T))
-        axia_img.set_data(np.flipud(data[:, :, new_z].T))
+        new_sag = data[new_x, :, :].T
+        new_coro = data[:, new_y, :].T
+        new_axia = data[:, :, new_z].T
+
+        # Flip up-down
+        if flip == "yes":
+            new_sag = np.flipud(sag)
+            new_coro = np.flipud(coro)
+            new_axia = np.flipud(axia)
+
+        sag_img.set_data(new_sag)
+        coro_img.set_data(new_coro)
+        axia_img.set_data(new_axia)
 
     x_slider.on_changed(update)
     y_slider.on_changed(update)

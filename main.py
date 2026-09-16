@@ -28,6 +28,12 @@ def main():
         required=True,
         help="Path to the image"
     )
+    parser_view.add_argument(
+        "--flip",
+        choices=["yes", "no"],
+        required=False,
+        default="no"
+    )
 
     # parser_view.add_argument(
     #     "--slice",
@@ -49,16 +55,15 @@ def main():
     )
 
     parser_proj.add_argument(
-        "--axis",
-        type=int,
-        choices=[0, 1, 2],
-        required=True
+     "--axis",
+        choices=["x", "y", "z"],
+        default="x"
     )
 
     parser_proj.add_argument(
         "--mode",
         choices=["max", "min"],
-        required=True
+        default="max",
     )
 
     # ---
@@ -90,7 +95,7 @@ def main():
     args = parser.parse_args()
 
     if args.command == "view":
-         view_image(args.image)
+         view_image(args.image, args.flip)
     #
     # elif args.command == "projection":
     #     compute_projection(
