@@ -3,9 +3,19 @@ import nibabel as nib
 import matplotlib.pyplot as plt
 
 from pathlib import Path
-
 from matplotlib.widgets import Slider
 
+"""
+view_image.py
+Ouvre un viewer générique de fichier de format .nii (nifti). Est utiliser avec l'argument "view".
+
+Arguments
+--image (REQUIS): Chemin vers les images à analyser dans le viewer. ("path/to/image.nii")
+--flip : Inverse les images entrées (Choix: {"yes", "no"})
+
+Exemple d'usage:
+    python main.py view --image "C:path\to\Data_TP1\Data_TP0\IRM\Brain\flair.nii" --flip yes
+"""
 
 def view_image(image_path, flip):
 
@@ -114,24 +124,20 @@ def view_image(image_path, flip):
         valstep = 1
     )
 
-    def update(null):
+    def update(_):
         new_x = x_slider.val
         new_y = y_slider.val
         new_z = z_slider.val
 
-        new_sag = data[new_x, :, :].T
-        new_coro = data[:, new_y, :].T
-        new_axia = data[:, :, new_z].T
-
         # Flip up-down
         if flip == "yes":
-            new_sag = np.flipud(sag)
-            new_coro = np.flipud(coro)
-            new_axia = np.flipud(axia)
-
-        sag_img.set_data(new_sag)
-        coro_img.set_data(new_coro)
-        axia_img.set_data(new_axia)
+            sag_img.set_data(np.flipud(data[new_x, :, :].T))
+            coro_img.set_data(np.flipud(data[:, new_y, :].T))
+            axia_img.set_data(np.flipud(data[:, :, new_z].T))
+        else:
+            sag_img.set_data(data[new_x, :, :].T)
+            coro_img.set_data(data[:, new_y, :].T)
+            axia_img.set_data(data[:, :, new_z].T)
 
     x_slider.on_changed(update)
     y_slider.on_changed(update)
