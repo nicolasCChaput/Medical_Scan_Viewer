@@ -11,13 +11,12 @@ Ouvre un viewer générique de fichier de format .nii (nifti). Est utiliser avec
 
 Arguments
 --image (REQUIS): Chemin vers les images à analyser dans le viewer. ("path/to/image.nii")
---flip : Inverse les images entrées (Choix: {"yes", "no"})
 
 Exemple d'usage:
-    python main.py view --image "C:path\to\Data_TP1\Data_TP0\IRM\Brain\flair.nii" --flip yes
+    python main.py view --image "C:path\to\Data_TP1\Data_TP0\IRM\Brain\flair.nii" 
 """
 
-def view_image(image_path, flip):
+def view_image(image_path):
 
     suffix = Path(image_path).suffix
     if suffix != ".nii":
@@ -34,7 +33,6 @@ def view_image(image_path, flip):
     #|___________|
     #|sld|sld|sld|
     #|___________|
-
     grid = fig.add_gridspec (
         nrows = 2,
         ncols = 3,
@@ -53,23 +51,24 @@ def view_image(image_path, flip):
 
     # --- Setup des données des images ---
 
-    # Load nifti - Chercher information de l'image
+    # Load nifti - Chercher les information  de l'image
     img = nib.load(image_path)
-    data = img.get_fdata()
+
+    data = img.get_fdata() # Données de l'image
+
+    # Standardiser l'orientation des images affichés (Viser RAR (Right-Anterior-Superior))
+
+    print("Original orientation:", nib.aff2axcodes(img.affine))
+    img_ras = nib.as_closest_canonical(img) # Convertission en RAH
+    print("New orientation:", nib.aff2axcodes(img_ras.affine))
 
     initial_x = data.shape[0] // 2
     initial_y = data.shape[1] // 2
     initial_z = data.shape[2] // 2
 
-    sag = data[initial_x, :, :].T
-    coro = data[:, initial_y, :].T
-    axia = data[:, :, initial_z].T
-
-    # Flip up-down
-    if flip == "yes":
-        sag = np.flipud(sag)
-        coro = np.flipud(coro)
-        axia = np.flipud(axia)
+    sag = data[initial_x, :, :]
+    coro = data[:, initial_y, :]
+    axia = data[:, :, initial_z]
 
     # --- Setup de la présentation des images dans leur grille ---
     # Note: aspect à "auto" semble être le mieux ig pour la visualisation
@@ -129,15 +128,9 @@ def view_image(image_path, flip):
         new_y = y_slider.val
         new_z = z_slider.val
 
-        # Flip up-down
-        if flip == "yes":
-            sag_img.set_data(np.flipud(data[new_x, :, :].T))
-            coro_img.set_data(np.flipud(data[:, new_y, :].T))
-            axia_img.set_data(np.flipud(data[:, :, new_z].T))
-        else:
-            sag_img.set_data(data[new_x, :, :].T)
-            coro_img.set_data(data[:, new_y, :].T)
-            axia_img.set_data(data[:, :, new_z].T)
+        sag_img.set_data(data[new_x, :, :])
+        coro_img.set_data(data[:, new_y, :])
+        axia_img.set_data(data[:, :, new_z])
 
     x_slider.on_changed(update)
     y_slider.on_changed(update)
