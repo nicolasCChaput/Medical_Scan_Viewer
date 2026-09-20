@@ -11,12 +11,13 @@ Ouvre un viewer générique de fichier de format .nii (nifti). Est utiliser avec
 
 Arguments
 --image (REQUIS): Chemin vers les images à analyser dans le viewer. ("path/to/image.nii")
+--grayscale: Affiche les images sous des intensités de noir à blanc. (Choix: yes, no)
 
 Exemple d'usage:
-    python main.py view --image "C:path\to\Data_TP1\Data_TP0\IRM\Brain\flair.nii" 
+    python main.py view --image "C:path\to\Data_TP1\Data_TP0\IRM\Brain\flair.nii" --grayscale yes
 """
 
-def view_image(image_path):
+def view_image(image_path, grayscale):
 
     suffix = Path(image_path).suffix
     if suffix != ".nii":
@@ -56,7 +57,7 @@ def view_image(image_path):
 
     data = img.get_fdata() # Données de l'image
 
-    # Standardiser l'orientation des images affichés (Viser RAR (Right-Anterior-Superior))
+    # Standardiser l'orientation des images affichés (Viser RAS (Right-Anterior-Superior))
 
     print("Original orientation:", nib.aff2axcodes(img.affine))
     img_ras = nib.as_closest_canonical(img) # Convertission en RAH
@@ -73,18 +74,24 @@ def view_image(image_path):
     # --- Setup de la présentation des images dans leur grille ---
     # Note: aspect à "auto" semble être le mieux ig pour la visualisation
 
+    if grayscale == "yes":
+        sag_img = pos_img_sag.imshow(sag, aspect="auto", cmap="gray")
+        coro_img = pos_img_coro.imshow(coro, aspect="auto", cmap="gray")
+        axia_img = pos_img_axia.imshow(axia, aspect="auto", cmap="gray")
+    else:
+        sag_img = pos_img_sag.imshow(sag, aspect="auto")
+        coro_img = pos_img_coro.imshow(coro, aspect="auto")
+        axia_img = pos_img_axia.imshow(axia, aspect="auto")
+
     # Sagittale
-    sag_img = pos_img_sag.imshow(sag, aspect="auto")
     axes[0].set_title("Sagittale")
     axes[0].axis("off")
 
     # Coronale
-    coro_img = pos_img_coro.imshow(coro, aspect="auto")
     axes[1].set_title("Coronale")
     axes[1].axis("off")
 
     # Axiale
-    axia_img = pos_img_axia.imshow(axia, aspect="auto")
     axes[2].set_title("Axiale")
     axes[2].axis("off")
 
