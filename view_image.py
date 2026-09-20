@@ -52,16 +52,20 @@ def view_image(image_path, grayscale):
 
     # --- Setup des données des images ---
 
-    # Load nifti - Chercher les information  de l'image
+    # Load nifti - Chercher les information entière de l'image
     img = nib.load(image_path)
-
-    data = img.get_fdata() # Données de l'image
+    print(img.header)
 
     # Standardiser l'orientation des images affichés (Viser RAS (Right-Anterior-Superior))
 
-    print("Original orientation:", nib.aff2axcodes(img.affine))
-    img_ras = nib.as_closest_canonical(img) # Convertission en RAH
-    print("New orientation:", nib.aff2axcodes(img_ras.affine))
+    og_orientation = "Original orientation:", nib.aff2axcodes(img.affine)
+    print(og_orientation)
+    img_ras = nib.as_closest_canonical(img) # Convertission en RAS
+    can_orientation = "Canonical orientation:", nib.aff2axcodes(img_ras.affine)
+    print(can_orientation)
+
+
+    data = img_ras.get_fdata()  # Données de l'image
 
     initial_x = data.shape[0] // 2
     initial_y = data.shape[1] // 2
@@ -75,13 +79,20 @@ def view_image(image_path, grayscale):
     # Note: aspect à "auto" semble être le mieux ig pour la visualisation
 
     if grayscale == "yes":
-        sag_img = pos_img_sag.imshow(sag, aspect="auto", cmap="gray")
-        coro_img = pos_img_coro.imshow(coro, aspect="auto", cmap="gray")
-        axia_img = pos_img_axia.imshow(axia, aspect="auto", cmap="gray")
+        sag_img = pos_img_sag.imshow(sag, aspect="auto", cmap="gray", origin="lower")
+        coro_img = pos_img_coro.imshow(coro, aspect="auto", cmap="gray", origin="lower")
+        axia_img = pos_img_axia.imshow(axia, aspect="auto", cmap="gray", origin="lower")
     else:
         sag_img = pos_img_sag.imshow(sag, aspect="auto")
         coro_img = pos_img_coro.imshow(coro, aspect="auto")
         axia_img = pos_img_axia.imshow(axia, aspect="auto")
+
+    # --- Titres des graphs et modifications des affichages ---
+
+    # Générale
+    fig.suptitle(f"{og_orientation} | {can_orientation}",
+    fontsize = 12
+    )
 
     # Sagittale
     axes[0].set_title("Sagittale")
@@ -94,6 +105,7 @@ def view_image(image_path, grayscale):
     # Axiale
     axes[2].set_title("Axiale")
     axes[2].axis("off")
+
 
     # --- Setup des sliders sous les images et dans leurs grille ---
 
