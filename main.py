@@ -1,7 +1,7 @@
 import argparse
 
 from view_image import view_image
-#from compute_mIP_MIP import compute_projection
+from compute_mIP_MIP import compute_projection
 #from show_image_stats import show_stats
 #from denoise_image import denoise_image
 
@@ -28,6 +28,12 @@ def main():
         required=True,
         help="Path to the image"
     )
+    parser_view.add_argument(
+        "--grayscale",
+        choices=["yes", "no"],
+        help="Grayscale the images",
+        default="yes"
+    )
 
     # parser_view.add_argument(
     #     "--slice",
@@ -42,22 +48,25 @@ def main():
         "projection",
         help="Compute MIP or MinIP"
     )
-
     parser_proj.add_argument(
         "--image",
         required=True
     )
-
     parser_proj.add_argument(
      "--axis",
         choices=["x", "y", "z"],
         default="x"
     )
-
     parser_proj.add_argument(
         "--mode",
         choices=["max", "min"],
         default="max",
+    )
+    parser_proj.add_argument(
+        "--grayscale",
+        choices=["yes", "no"],
+        help="Grayscale the images",
+        default="yes"
     )
 
     # ---
@@ -89,14 +98,15 @@ def main():
     args = parser.parse_args()
 
     if args.command == "view":
-         view_image(args.image)
-    #
-    # elif args.command == "projection":
-    #     compute_projection(
-    #         args.image,
-    #         args.axis,
-    #         args.mode
-    #     )
+         view_image(args.image, args.grayscale)
+
+    elif args.command == "projection":
+        compute_projection(
+            args.image,
+            args.axis,
+            args.mode,
+            args.grayscale
+        )
     #
     # elif args.command == "stats":
     #     show_stats(args.image)
@@ -107,4 +117,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
