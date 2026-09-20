@@ -2,8 +2,8 @@ import argparse
 
 from view_image import view_image
 from compute_mIP_MIP import compute_projection
-#from show_image_stats import show_stats
-#from denoise_image import denoise_image
+from show_image_stats import show_stats
+from denoise_image import denoise_image
 
 def main():
 
@@ -107,12 +107,12 @@ def main():
             args.mode,
             args.grayscale
         )
-    #
-    # elif args.command == "stats":
-    #     show_stats(args.image)
-    #
-    # elif args.command == "denoise":
-    #     denoise_image(args.image)
+
+    elif args.command == "stats":
+        show_stats(args.image)
+
+    elif args.command == "denoise":
+        denoise_image(args.image)
 
 
 if __name__ == "__main__":
