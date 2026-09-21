@@ -21,7 +21,7 @@ Exemple d'usage:
 
 def compute_projection(image_path, axis, mode, grayscale):
 
-    # Chercher les information  de l'image
+    # Chercher les informations de l'image
     img = nib.load(image_path)
     data = img.get_fdata()  # Données de l'image
 
