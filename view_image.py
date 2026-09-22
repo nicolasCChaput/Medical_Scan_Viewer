@@ -23,6 +23,7 @@ def view_image(image_path, grayscale):
     if suffix != ".nii":
         raise Exception(f"Provided file is not a .nii file. Provided file format: {suffix}")
 
+
     # --- Setup générale du viewer ---
 
     fig, axes = plt.subplots(1, 3, figsize=(15, 5))
@@ -50,18 +51,20 @@ def view_image(image_path, grayscale):
     pos_sld_coro = fig.add_subplot(grid[1,1])
     pos_sld_axia = fig.add_subplot(grid[1,2])
 
+
     # --- Setup des données des images ---
 
     # Load nifti - Chercher les information entière de l'image
     img = nib.load(image_path)
-    print(img.header)
+    # print(img.header)
 
     # Standardiser l'orientation des images affichés (Viser RAS (Right-Anterior-Superior))
-
-    og_orientation = "Original orientation:", nib.aff2axcodes(img.affine)
+    og_orientation = "Nibabel original orientation:", nib.aff2axcodes(img.affine)
     print(og_orientation)
+
     img_ras = nib.as_closest_canonical(img) # Convertission en RAS
-    can_orientation = "Canonical orientation:", nib.aff2axcodes(img_ras.affine)
+
+    can_orientation = "Nibabel canonical orientation:", nib.aff2axcodes(img_ras.affine)
     print(can_orientation)
 
 
@@ -87,12 +90,11 @@ def view_image(image_path, grayscale):
         coro_img = pos_img_coro.imshow(coro, aspect="auto")
         axia_img = pos_img_axia.imshow(axia, aspect="auto")
 
+
     # --- Titres des graphs et modifications des affichages ---
 
     # Générale
-    fig.suptitle(f"{og_orientation} | {can_orientation}",
-    fontsize = 12
-    )
+    fig.suptitle(f"{og_orientation} | {can_orientation}",fontsize = 12)
 
     # Sagittale
     axes[0].set_title("Sagittale")
@@ -110,7 +112,6 @@ def view_image(image_path, grayscale):
     # --- Setup des sliders sous les images et dans leurs grille ---
 
     # Slider Coupe Sagittale
-    # x_slider_visual = fig.add_axes([0.15, 0.20, 0.7, 0.03])
     x_slider = Slider(
         ax = pos_sld_sag,
         label = "",
@@ -121,7 +122,6 @@ def view_image(image_path, grayscale):
     )
 
     # Slider Coupe Coronale
-    # y_slider_visual = fig.add_axes([0.15, 0.14, 0.7, 0.03])
     y_slider = Slider(
         ax = pos_sld_coro,
         label = "",
@@ -132,7 +132,6 @@ def view_image(image_path, grayscale):
     )
 
     # Slider Coupe Axiale
-    # z_slider_visual = fig.add_axes([0.15, 0.08, 0.7, 0.03])
     z_slider = Slider(
         ax = pos_sld_axia,
         label = "",
