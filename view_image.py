@@ -1,6 +1,7 @@
 import numpy as np
 import nibabel as nib
 import matplotlib.pyplot as plt
+import subprocess
 
 from pathlib import Path
 from matplotlib.widgets import Slider
@@ -16,6 +17,15 @@ Arguments
 Exemple d'usage:
     python main.py view --image "C:path\to\Data_TP1\Data_TP0\IRM\Brain\flair.nii" --grayscale yes
 """
+
+# Info sur l'interpretation des orientations: http://www.grahamwideman.com/gw/brain/orientation/orientterms.htm
+def mrinfo_orientation(image_path):
+
+    cmd = ["mrinfo", image_path]
+    meta_data = subprocess.run(cmd, capture_output=True, text=True, check=True).stdout.strip()
+
+    strides = meta_data("-strides")
+    return strides
 
 def view_image(image_path, grayscale):
 
@@ -57,6 +67,10 @@ def view_image(image_path, grayscale):
     # Load nifti - Chercher les information entière de l'image
     img = nib.load(image_path)
     # print(img.header)
+
+    # Chercher l'info d'orientation de l'image en utilisant mrinfo
+    print(mrinfo_orientation(image_path))
+
 
     # Standardiser l'orientation des images affichés (Viser RAS (Right-Anterior-Superior))
     og_orientation = "Nibabel original orientation:", nib.aff2axcodes(img.affine)
