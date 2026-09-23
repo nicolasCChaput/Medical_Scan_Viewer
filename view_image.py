@@ -21,18 +21,60 @@ Exemple d'usage:
 # Info sur l'interpretation des orientations: http://www.grahamwideman.com/gw/brain/orientation/orientterms.htm
 def mrinfo_orientation(image_path):
 
-    cmd = ["mrinfo", image_path]
-    meta_data = subprocess.run(cmd, capture_output=True, text=True, check=True).stdout.strip()
+    mrinfo_exe = r"C:\msys64\mingw64\bin\mrinfo.exe"
 
-    strides = meta_data("-strides")
-    return strides
+    result = subprocess.run(
+        [mrinfo_exe, image_path, "-transform"],
+        capture_output=True,
+        text=True,
+        check=True
+    )
+
+    lines = result.stdout.strip().split("\n")
+
+    # Extraire la matrice 4x4
+    matrix = []
+    for line in lines:
+        values = line.strip().split()
+        if len(values) == 4:
+            try:
+                matrix.append([float(v) for v in values])
+            except ValueError:
+                pass
+
+    matrix = np.array(matrix)
+
+    if matrix.shape != (4, 4):
+        raise RuntimeError("Impossible de lire la matrice transform de mrinfo")
+
+    affine = matrix
+
+    orientation = ""
+
+    for axis in range(3):
+
+        col = affine[:3, axis]
+
+        dominant = np.argmax(np.abs(col))
+        sign = np.sign(col[dominant])
+
+        if dominant == 0:
+            orientation += "R" if sign > 0 else "L"
+
+        elif dominant == 1:
+            orientation += "A" if sign > 0 else "P"
+
+        elif dominant == 2:
+            orientation += "S" if sign > 0 else "I"
+
+    return orientation
+
 
 def view_image(image_path, grayscale):
 
     suffix = Path(image_path).suffix
     if suffix != ".nii":
         raise Exception(f"Provided file is not a .nii file. Provided file format: {suffix}")
-
 
     # --- Setup générale du viewer ---
 
@@ -70,7 +112,6 @@ def view_image(image_path, grayscale):
 
     # Chercher l'info d'orientation de l'image en utilisant mrinfo
     print(mrinfo_orientation(image_path))
-
 
     # Standardiser l'orientation des images affichés (Viser RAS (Right-Anterior-Superior))
     og_orientation = "Nibabel original orientation:", nib.aff2axcodes(img.affine)
