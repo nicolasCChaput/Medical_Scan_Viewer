@@ -18,21 +18,22 @@ Exemple d'usage:
     python main.py view --image "C:path\to\Data_TP1\Data_TP0\IRM\Brain\flair.nii" --grayscale yes
 """
 
-# Info sur l'interpretation des orientations: http://www.grahamwideman.com/gw/brain/orientation/orientterms.htm
 def mrinfo_orientation(image_path):
 
     mrinfo_exe = r"C:\msys64\mingw64\bin\mrinfo.exe"
 
-    result = subprocess.run(
-        [mrinfo_exe, image_path, "-transform"],
+    cmd_return = subprocess.run(
+        [mrinfo_exe, image_path, "-transform"], # Nous devons regarder la transform pour déterminer l'orientation
         capture_output=True,
         text=True,
         check=True
     )
 
-    lines = result.stdout.strip().split("\n")
+    # --- Code fournit par Copilot ---
 
-    # Extraire la matrice 4x4
+    lines = cmd_return.stdout.strip().split("\n")
+
+    # Extraire la matrice 4x4 de transform
     matrix = []
     for line in lines:
         values = line.strip().split()
@@ -42,29 +43,33 @@ def mrinfo_orientation(image_path):
             except ValueError:
                 pass
 
-    matrix = np.array(matrix)
+    # --- Fin du code fournit par Copilot ---
 
-    if matrix.shape != (4, 4):
-        raise RuntimeError("Impossible de lire la matrice transform de mrinfo")
+    # Matrice transform extraite:
+    matrix_affine = np.array(matrix)
 
-    affine = matrix
+    print(matrix_affine)
 
-    orientation = ""
+    orientation = "" # Orientation, rempli dans la boucle si-dessous
 
     for axis in range(3):
 
-        col = affine[:3, axis]
+        col = matrix_affine[:3, axis]
 
-        dominant = np.argmax(np.abs(col))
-        sign = np.sign(col[dominant])
+        dominant_term = np.argmax(np.abs(col))
+        sign = np.sign(col[dominant_term]) # 1 ou -1
 
-        if dominant == 0:
+        # print(dominant_term)
+        # print(sign)
+
+        # Info sur l'interpretation des orientations: http://www.grahamwideman.com/gw/brain/orientation/orientterms.htm
+        if dominant_term == 0:
             orientation += "R" if sign > 0 else "L"
 
-        elif dominant == 1:
+        elif dominant_term == 1:
             orientation += "A" if sign > 0 else "P"
 
-        elif dominant == 2:
+        elif dominant_term == 2:
             orientation += "S" if sign > 0 else "I"
 
     return orientation
@@ -110,16 +115,17 @@ def view_image(image_path, grayscale):
     img = nib.load(image_path)
     # print(img.header)
 
-    # Chercher l'info d'orientation de l'image en utilisant mrinfo
-    print(mrinfo_orientation(image_path))
+    # Orientation des nifti selon mrinfo/MrTrix
+    mrinfo_orient = mrinfo_orientation(image_path)
+    print("MrInfo orientation: ", mrinfo_orient)
 
-    # Standardiser l'orientation des images affichés (Viser RAS (Right-Anterior-Superior))
-    og_orientation = "Nibabel original orientation:", nib.aff2axcodes(img.affine)
+    # --- Standardiser l'orientation des images affichés (Viser RAS (Right-Anterior-Superior)) ---
+    og_orientation = "Nibabel original orientation: ", nib.aff2axcodes(img.affine)
     print(og_orientation)
 
     img_ras = nib.as_closest_canonical(img) # Convertission en RAS
 
-    can_orientation = "Nibabel canonical orientation:", nib.aff2axcodes(img_ras.affine)
+    can_orientation = "Nibabel canonical orientation: ", nib.aff2axcodes(img_ras.affine)
     print(can_orientation)
 
 
@@ -147,9 +153,6 @@ def view_image(image_path, grayscale):
 
 
     # --- Titres des graphs et modifications des affichages ---
-
-    # Générale
-    fig.suptitle(f"{og_orientation} | {can_orientation}",fontsize = 12)
 
     # Sagittale
     axes[0].set_title("Sagittale")
