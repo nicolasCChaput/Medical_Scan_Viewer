@@ -12,7 +12,7 @@ Ouvre un viewer générique de fichier de format .nii (nifti). Est utiliser avec
 
 Arguments
 --image (REQUIS): Chemin vers les images à analyser dans le viewer. ("path/to/image.nii")
---grayscale: Affiche les images sous des intensités de noir à blanc. (Choix: yes, no)
+--grayscale: Affiche l'image en niveaux de gris. (Choix possibles: yes -> affichage noir et blanc | no -> palette de couleurs par défaut )
 
 Exemple d'usage:
     python main.py view --image "C:path\to\Data_TP1\Data_TP0\IRM\Brain\flair.nii" --grayscale yes
@@ -129,7 +129,7 @@ def view_image(image_path, grayscale):
     print(can_orientation)
 
 
-    data = img_ras.get_fdata()  # Données de l'image
+    data = img_ras.get_fdata()  # Données de l'image, // 2 pour mettre le point de départ au centre
 
     initial_x = data.shape[0] // 2
     initial_y = data.shape[1] // 2
