@@ -1,6 +1,7 @@
 import numpy as np
 import nibabel as nib
 import matplotlib.pyplot as plt
+import subprocess
 
 from pathlib import Path
 from matplotlib.widgets import Slider
@@ -11,11 +12,68 @@ Ouvre un viewer générique de fichier de format .nii (nifti). Est utiliser avec
 
 Arguments
 --image (REQUIS): Chemin vers les images à analyser dans le viewer. ("path/to/image.nii")
---grayscale: Affiche les images sous des intensités de noir à blanc. (Choix: yes, no)
+--grayscale: Affiche l'image en niveaux de gris. (Choix possibles: yes -> affichage noir et blanc | no -> palette de couleurs par défaut )
 
 Exemple d'usage:
     python main.py view --image "C:path\to\Data_TP1\Data_TP0\IRM\Brain\flair.nii" --grayscale yes
 """
+
+def mrinfo_orientation(image_path):
+
+    mrinfo_exe = r"C:\msys64\mingw64\bin\mrinfo.exe"
+
+    cmd_return = subprocess.run(
+        [mrinfo_exe, image_path, "-transform"], # Nous devons regarder la transform pour déterminer l'orientation
+        capture_output=True,
+        text=True,
+        check=True
+    )
+
+    # --- Code fournit par Copilot ---
+
+    lines = cmd_return.stdout.strip().split("\n")
+
+    # Extraire la matrice 4x4 de transform
+    matrix = []
+    for line in lines:
+        values = line.strip().split()
+        if len(values) == 4:
+            try:
+                matrix.append([float(v) for v in values])
+            except ValueError:
+                pass
+
+    # --- Fin du code fournit par Copilot ---
+
+    # Matrice transform extraite:
+    matrix_affine = np.array(matrix)
+
+    print(matrix_affine)
+
+    orientation = "" # Orientation, rempli dans la boucle si-dessous
+
+    for axis in range(3):
+
+        col = matrix_affine[:3, axis]
+
+        dominant_term = np.argmax(np.abs(col))
+        sign = np.sign(col[dominant_term]) # 1 ou -1
+
+        # print(dominant_term)
+        # print(sign)
+
+        # Info sur l'interpretation des orientations: http://www.grahamwideman.com/gw/brain/orientation/orientterms.htm
+        if dominant_term == 0:
+            orientation += "R" if sign > 0 else "L"
+
+        elif dominant_term == 1:
+            orientation += "A" if sign > 0 else "P"
+
+        elif dominant_term == 2:
+            orientation += "S" if sign > 0 else "I"
+
+    return orientation
+
 
 def view_image(image_path, grayscale):
 
@@ -50,18 +108,28 @@ def view_image(image_path, grayscale):
     pos_sld_coro = fig.add_subplot(grid[1,1])
     pos_sld_axia = fig.add_subplot(grid[1,2])
 
+
     # --- Setup des données des images ---
 
-    # Load nifti - Chercher les information  de l'image
+    # Load nifti - Chercher les information entière de l'image
     img = nib.load(image_path)
+    # print(img.header)
 
-    data = img.get_fdata() # Données de l'image
+    # Orientation des nifti selon mrinfo/MrTrix
+    mrinfo_orient = mrinfo_orientation(image_path)
+    print("MrInfo orientation: ", mrinfo_orient)
 
-    # Standardiser l'orientation des images affichés (Viser RAS (Right-Anterior-Superior))
+    # --- Standardiser l'orientation des images affichés (Viser RAS (Right-Anterior-Superior)) ---
+    og_orientation = "Nibabel original orientation: ", nib.aff2axcodes(img.affine)
+    print(og_orientation)
 
-    print("Original orientation:", nib.aff2axcodes(img.affine))
-    img_ras = nib.as_closest_canonical(img) # Convertission en RAH
-    print("New orientation:", nib.aff2axcodes(img_ras.affine))
+    img_ras = nib.as_closest_canonical(img) # Convertission en RAS
+
+    can_orientation = "Nibabel canonical orientation: ", nib.aff2axcodes(img_ras.affine)
+    print(can_orientation)
+
+
+    data = img_ras.get_fdata()  # Données de l'image, // 2 pour mettre le point de départ au centre
 
     initial_x = data.shape[0] // 2
     initial_y = data.shape[1] // 2
@@ -75,13 +143,16 @@ def view_image(image_path, grayscale):
     # Note: aspect à "auto" semble être le mieux ig pour la visualisation
 
     if grayscale == "yes":
-        sag_img = pos_img_sag.imshow(sag, aspect="auto", cmap="gray")
-        coro_img = pos_img_coro.imshow(coro, aspect="auto", cmap="gray")
-        axia_img = pos_img_axia.imshow(axia, aspect="auto", cmap="gray")
+        sag_img = pos_img_sag.imshow(sag, aspect="auto", cmap="gray", origin="lower")
+        coro_img = pos_img_coro.imshow(coro, aspect="auto", cmap="gray", origin="lower")
+        axia_img = pos_img_axia.imshow(axia, aspect="auto", cmap="gray", origin="lower")
     else:
         sag_img = pos_img_sag.imshow(sag, aspect="auto")
         coro_img = pos_img_coro.imshow(coro, aspect="auto")
         axia_img = pos_img_axia.imshow(axia, aspect="auto")
+
+
+    # --- Titres des graphs et modifications des affichages ---
 
     # Sagittale
     axes[0].set_title("Sagittale")
@@ -95,10 +166,10 @@ def view_image(image_path, grayscale):
     axes[2].set_title("Axiale")
     axes[2].axis("off")
 
+
     # --- Setup des sliders sous les images et dans leurs grille ---
 
     # Slider Coupe Sagittale
-    # x_slider_visual = fig.add_axes([0.15, 0.20, 0.7, 0.03])
     x_slider = Slider(
         ax = pos_sld_sag,
         label = "",
@@ -109,7 +180,6 @@ def view_image(image_path, grayscale):
     )
 
     # Slider Coupe Coronale
-    # y_slider_visual = fig.add_axes([0.15, 0.14, 0.7, 0.03])
     y_slider = Slider(
         ax = pos_sld_coro,
         label = "",
@@ -120,7 +190,6 @@ def view_image(image_path, grayscale):
     )
 
     # Slider Coupe Axiale
-    # z_slider_visual = fig.add_axes([0.15, 0.08, 0.7, 0.03])
     z_slider = Slider(
         ax = pos_sld_axia,
         label = "",
