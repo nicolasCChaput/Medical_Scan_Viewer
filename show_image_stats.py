@@ -6,7 +6,7 @@ Arguments
 --image (REQUIS): Chemin vers les images à analyser. ("path/to/image.abc")
 
 Exemple d'usage:
-    python main.py stats --image "C:path\to\Data_TP1\Data_TP0\IRM\Brain\flair.nii"
+    python main.py stats --image "C:path/to/Data_TP1/Data_TP0/IRM/Brain/flair.nii"
 """
 
 import numpy as np
@@ -17,12 +17,14 @@ from pathlib import Path
 from matplotlib.widgets import Slider
 from nibabel.affines import voxel_sizes
 
+from utils import load_image
+
 def contraste_de_michelson(image_path):
     # Selon les notes de cours:
     #   Cm = (Imax - Imin) / (Imax + Imin)
 
-    img = nib.load(image_path)
-    data = img.get_fdata()
+    # Chercher les informations des images
+    data, img = load_image(image_path)
 
     imax = np.max(data)
     imin = np.min(data)
@@ -41,8 +43,8 @@ def contraste_rms(image_path):
     #   sqrt(mean((i - mean(i))^2))
     #   ou i sont les intensité
 
-    img = nib.load(image_path)
-    data = img.get_fdata()
+    # Chercher les informations des images
+    data, img = load_image(image_path)
 
     Crms = np.sqrt(np.mean(np.square(data - np.mean(data))))
 
@@ -55,13 +57,21 @@ def snr():
 
 def show_stats(image_path):
 
-    # Chercher les informations de l'image
-    img = nib.load(image_path)
-    data = img.get_fdata()  # Données de l'image
+    # Chercher les informations des images
+    data, img = load_image(image_path)
 
     dimensions = data.shape
 
-    voxel_sizes = img.header.get_zooms()
+    # Recherche de la taille des voxels
+    if img is not None:
+        voxel_sizes = img.header.get_zooms()[:3]
+        voxel_str = (
+            f"{voxel_sizes[0]:.3f} x "
+            f"{voxel_sizes[1]:.3f} x "
+            f"{voxel_sizes[2]:.3f} mm"
+        )
+    else:
+        voxel_str = "N/A"
 
     Cm = contraste_de_michelson(image_path)
 
@@ -74,13 +84,7 @@ def show_stats(image_path):
     print("=" * 70)
     stats = [
         ("Dimensions", f"{dimensions} voxels"),
-
-        # (
-        #     "Voxel size",
-        #     f"{voxel_sizes.3f} x "
-        #     f"{voxel_sizes.3f} x "
-        #     f"{voxel_sizes.3f} mm"
-        # ),
+        ("Voxel size", voxel_str),
         ("Min intensity", f"{np.min(data):.3f}"),
         ("Max intensity", f"{np.max(data):.3f}"),
         ("Mean intensity", f"{np.mean(data):.3f}"),

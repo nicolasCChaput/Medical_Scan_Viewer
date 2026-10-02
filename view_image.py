@@ -119,7 +119,7 @@ def view_image(image_path, grayscale, mrinfo):
 
     # --- Setup des données des images ---
 
-    # Load nifti - Chercher les information entière de l'image
+    # Chercher les informations des images
     data, img = load_image(image_path)
     # print(img.header)
 

@@ -13,7 +13,6 @@ Exemple d'usage:
 """
 
 import numpy as np
-import nibabel as nib
 import matplotlib.pyplot as plt
 from pathlib import Path
 
@@ -25,7 +24,7 @@ def compute_projection(image_path, axis, mode, grayscale):
     if suffix != ".nii":
         raise Exception(f"Provided file is not a .nii file. Provided file format: {suffix}")
 
-    # Chercher les informations de l'image
+    # Chercher les informations des images
     data, img = load_image(image_path)
 
     # À partir de l'entrée de l'axis, déterminer l'id de l'axe
