@@ -10,12 +10,9 @@ Exemple d'usage:
 """
 
 import numpy as np
-import nibabel as nib
 import matplotlib.pyplot as plt
 
 from pathlib import Path
-from matplotlib.widgets import Slider
-from nibabel.affines import voxel_sizes
 
 from utils import load_image
 
@@ -53,6 +50,38 @@ def contraste_rms(image_path):
 
 def snr():
     return
+
+def histogram(image_path):
+
+    # Chercher les informations des images
+    data, img = load_image(image_path)
+
+    # Séparer les zéros et les autres valeurs
+    zeros = data[data == 0]
+    non_zeros = data[data != 0]
+
+    # Conserver au plus 10000 zéros (les images médicales sont bourré de 0)
+    max_zeros = 5000
+
+    if len(zeros) > max_zeros:
+        zeros = np.random.choice(zeros, size=max_zeros, replace=False)
+
+    values_for_hist = np.concatenate([zeros, non_zeros])
+
+    # Définitions de l'affichage de l'histogramme
+    plt.figure(figsize=(8, 5))
+    plt.hist(
+        values_for_hist,
+        bins=256,
+        color="steelblue"
+    )
+
+    plt.title(f"Histogramme des intensités de\n{Path(image_path).name}")
+    plt.xlabel("Intensité")
+    plt.ylabel("Nombre de voxels/pixels")
+    plt.grid(True, alpha=0.3)
+
+    plt.show()
 
 
 def show_stats(image_path):
@@ -98,3 +127,6 @@ def show_stats(image_path):
         print(f"{key:<25} : {value}")
 
     print("=" * 70)
+
+    # Afficher l'histogram pour analyser le bruit
+    histogram(image_path)
