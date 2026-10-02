@@ -1,11 +1,3 @@
-import numpy as np
-import nibabel as nib
-import matplotlib.pyplot as plt
-
-from pathlib import Path
-from matplotlib.widgets import Slider
-from nibabel.affines import voxel_sizes
-
 """
 show_image_stats.py
 ...
@@ -16,6 +8,14 @@ Arguments
 Exemple d'usage:
     python main.py stats --image "C:path\to\Data_TP1\Data_TP0\IRM\Brain\flair.nii"
 """
+
+import numpy as np
+import nibabel as nib
+import matplotlib.pyplot as plt
+
+from pathlib import Path
+from matplotlib.widgets import Slider
+from nibabel.affines import voxel_sizes
 
 def contraste_de_michelson(image_path):
     # Selon les notes de cours:

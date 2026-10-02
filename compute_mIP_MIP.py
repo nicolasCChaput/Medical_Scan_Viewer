@@ -1,10 +1,6 @@
-import numpy as np
-import nibabel as nib
-import matplotlib.pyplot as plt
-
 """
 compute_mIP_MIP.py
-...
+Calcule et affiche la projection d’intensité minimale (mIP) ou maximale (MIP) de fichier nifti exclusivement selon des entrées d'axes (x, y, z) et du mode (max, min).
 
 Arguments
 --image (REQUIS): Chemin vers les images à analyser dans le viewer. ("path/to/image.nii")
@@ -13,14 +9,24 @@ Arguments
 --grayscale: Affiche l'image en niveaux de gris. (Choix possibles: yes -> affichage noir et blanc | no -> palette de couleurs par défaut )
 
 Exemple d'usage:
-    python main.py projection --image "C:path\to\Data_TP1\Data_TP0\IRM\Brain\flair.nii" --axis x --mode max --grayscale yes
+    python main.py projection --image "C:path/to/Data_TP1/Data_TP0/IRM/Brain/flair.nii" --axis x --mode max --grayscale yes
 """
+
+import numpy as np
+import nibabel as nib
+import matplotlib.pyplot as plt
+from pathlib import Path
+
+from utils import load_image
 
 def compute_projection(image_path, axis, mode, grayscale):
 
+    suffix = Path(image_path).suffix
+    if suffix != ".nii":
+        raise Exception(f"Provided file is not a .nii file. Provided file format: {suffix}")
+
     # Chercher les informations de l'image
-    img = nib.load(image_path)
-    data = img.get_fdata()  # Données de l'image
+    data, img = load_image(image_path)
 
     # À partir de l'entrée de l'axis, déterminer l'id de l'axe
     if axis== "x":

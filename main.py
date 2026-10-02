@@ -1,3 +1,8 @@
+"""
+main.py
+Gestionnaire du argparser.
+"""
+
 import argparse
 
 from view_image import view_image
@@ -33,6 +38,12 @@ def main():
         choices=["yes", "no"],
         help="Grayscale the images",
         default="yes"
+    )
+    parser_view.add_argument(
+        "--mrinfo",
+        choices=["yes", "no"],
+        help="Grayscale the images",
+        default="no"
     )
 
     # parser_view.add_argument(
@@ -98,7 +109,11 @@ def main():
     args = parser.parse_args()
 
     if args.command == "view":
-         view_image(args.image, args.grayscale)
+         view_image(
+             args.image,
+             args.grayscale,
+             args.mrinfo
+         )
 
     elif args.command == "projection":
         compute_projection(
