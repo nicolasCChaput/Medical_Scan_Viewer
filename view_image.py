@@ -149,16 +149,42 @@ def view_image(image_path, grayscale, mrinfo):
     axia = data[:, :, initial_z]
 
     # --- Setup de la présentation des images dans leur grille ---
-    # Note: aspect à "auto" semble être le mieux ig pour la visualisation
+
+    # Taille physique des voxels afin d'adapter la résolution des images pour l'affichage
+    voxel_size_x, voxel_size_y, voxel_size_z = img_ras.header.get_zooms()[:3]
+
+    # Sagittale : Y-Z
+    sag_extent = [
+        0,
+        data.shape[1] * voxel_size_y,
+        0,
+        data.shape[2] * voxel_size_z
+    ]
+
+    # Coronale : X-Z
+    coro_extent = [
+        0,
+        data.shape[0] * voxel_size_x,
+        0,
+        data.shape[2] * voxel_size_z
+    ]
+
+    # Axiale : X-Y
+    axia_extent = [
+        0,
+        data.shape[0] * voxel_size_x,
+        0,
+        data.shape[1] * voxel_size_y
+    ]
 
     if grayscale == "yes":
-        sag_img = pos_img_sag.imshow(sag, aspect="auto", cmap="gray", origin="lower")
-        coro_img = pos_img_coro.imshow(coro, aspect="auto", cmap="gray", origin="lower")
-        axia_img = pos_img_axia.imshow(axia, aspect="auto", cmap="gray", origin="lower")
+        sag_img = pos_img_sag.imshow(sag, aspect="equal", cmap="gray", origin="lower", extent=sag_extent, interpolation="none")
+        coro_img = pos_img_coro.imshow(coro, aspect="equal", cmap="gray", origin="lower", extent=coro_extent, interpolation="none")
+        axia_img = pos_img_axia.imshow(axia, aspect="equal", cmap="gray", origin="lower", extent=axia_extent, interpolation="none")
     else:
-        sag_img = pos_img_sag.imshow(sag, aspect="auto")
-        coro_img = pos_img_coro.imshow(coro, aspect="auto")
-        axia_img = pos_img_axia.imshow(axia, aspect="auto")
+        sag_img = pos_img_sag.imshow(sag, aspect="equal", origin="lower", extent=sag_extent, interpolation="none")
+        coro_img = pos_img_coro.imshow(coro, aspect="equal", origin="lower", extent=coro_extent, interpolation="none")
+        axia_img = pos_img_axia.imshow(axia, aspect="equal", origin="lower",  extent=axia_extent, interpolation="none")
 
 
     # --- Titres des graphs et modifications des affichages ---
