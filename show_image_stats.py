@@ -48,8 +48,31 @@ def contraste_rms(image_path):
     return Crms
 
 
-def snr():
-    return
+def snr(image_path, ignore_background):
+    # Selon les notes de cours:
+    #   SNR = moyenne du signal / écart-type du bruit
+
+    # Chercher les informations des images
+    data, img = load_image(image_path)
+
+    signal = data
+
+    # Retirer le fond noir
+    if(ignore_background == True):
+        signal = data[data > 0]
+
+    # Moyenne du signal
+    signal_mean = np.mean(signal)
+
+    # Estimation du bruit à partir des voxels appartenant aux 10 % plus faibles intensités
+    percent_10 = np.percentile(signal, 10)
+    noise_voxels = signal[signal <= percent_10]
+
+    # Écart type du bruit
+    noise_std = np.std(noise_voxels)
+
+    return signal_mean / noise_std
+
 
 def histogram(image_path):
 
@@ -66,12 +89,12 @@ def histogram(image_path):
     if len(zeros) > max_zeros:
         zeros = np.random.choice(zeros, size=max_zeros, replace=False)
 
-    values_for_hist = np.concatenate([zeros, non_zeros])
+    values = np.concatenate([zeros, non_zeros])
 
     # Définitions de l'affichage de l'histogramme
     plt.figure(figsize=(8, 5))
     plt.hist(
-        values_for_hist,
+        values,
         bins=256,
         color="steelblue"
     )
@@ -106,6 +129,9 @@ def show_stats(image_path):
 
     Crms = contraste_rms(image_path)
 
+    SNR = snr(image_path, False)
+    SNR_ignore_background = snr(image_path, True)
+
     # --- Affichage fournit par Copilot ---
 
     print("\n" + "=" * 70)
@@ -120,7 +146,8 @@ def show_stats(image_path):
         ("Std intensity", f"{np.std(data):.3f}"),
         ("Michelson contrast", f"{Cm:.6f}"),
         ("RMS contrast", f"{Crms:.6f}"),
-        #("Estimated SNR", f"{snr:.6f}")
+        ("SNR", f"{SNR:.6f}"),
+        ("SNR ignoring background", f"{SNR_ignore_background:.6f}")
     ]
 
     for key, value in stats:
