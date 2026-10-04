@@ -1,3 +1,16 @@
+"""
+view_image.py
+Ouvre un viewer générique de fichier de format .nii (nifti). Est utiliser avec l'argument "view".
+
+Arguments
+--image (REQUIS): Chemin vers les images à analyser dans le viewer. ("path/to/image.nii")
+--grayscale: Affiche l'image en niveaux de gris. (Choix possibles: yes -> affichage noir et blanc | no -> palette de couleurs par défaut )
+--mrinfo: Fait les appels nécessaire pour voir les information de mrinfo sur l'orientation. (Choix possibles: yes -> fait les appels à mrinfo | no -> ne fait pas les appels à mrinfo )
+
+Exemple d'usage:
+    python main.py view --image "C:path/to/Data_TP1/Data_TP0/IRM/Brain/flair.nii" --grayscale yes --mrinfo yes
+"""
+
 import numpy as np
 import nibabel as nib
 import matplotlib.pyplot as plt
@@ -6,20 +19,11 @@ import subprocess
 from pathlib import Path
 from matplotlib.widgets import Slider
 
-"""
-view_image.py
-Ouvre un viewer générique de fichier de format .nii (nifti). Est utiliser avec l'argument "view".
-
-Arguments
---image (REQUIS): Chemin vers les images à analyser dans le viewer. ("path/to/image.nii")
---grayscale: Affiche l'image en niveaux de gris. (Choix possibles: yes -> affichage noir et blanc | no -> palette de couleurs par défaut )
-
-Exemple d'usage:
-    python main.py view --image "C:path\to\Data_TP1\Data_TP0\IRM\Brain\flair.nii" --grayscale yes
-"""
+from utils import load_image
 
 def mrinfo_orientation(image_path):
 
+    # Modifier au besoin, nécessaire pour windows
     mrinfo_exe = r"C:\msys64\mingw64\bin\mrinfo.exe"
 
     cmd_return = subprocess.run(
@@ -63,25 +67,29 @@ def mrinfo_orientation(image_path):
         # print(sign)
 
         # Info sur l'interpretation des orientations: http://www.grahamwideman.com/gw/brain/orientation/orientterms.htm
+
+        # X -> R ou L
         if dominant_term == 0:
             orientation += "R" if sign > 0 else "L"
 
+        # Y -> A ou P
         elif dominant_term == 1:
             orientation += "A" if sign > 0 else "P"
 
+        # Z -> S ou I
         elif dominant_term == 2:
             orientation += "S" if sign > 0 else "I"
 
     return orientation
 
 
-def view_image(image_path, grayscale):
+def view_image(image_path, grayscale, mrinfo):
 
     suffix = Path(image_path).suffix
     if suffix != ".nii":
         raise Exception(f"Provided file is not a .nii file. Provided file format: {suffix}")
 
-    # --- Setup générale du viewer ---
+    # --- Setup général du viewer ---
 
     fig, axes = plt.subplots(1, 3, figsize=(15, 5))
     plt.subplots_adjust(bottom=0.10) # Espace pour les sliders sous les images
@@ -111,13 +119,14 @@ def view_image(image_path, grayscale):
 
     # --- Setup des données des images ---
 
-    # Load nifti - Chercher les information entière de l'image
-    img = nib.load(image_path)
+    # Chercher les informations des images
+    data, img = load_image(image_path)
     # print(img.header)
 
     # Orientation des nifti selon mrinfo/MrTrix
-    mrinfo_orient = mrinfo_orientation(image_path)
-    print("MrInfo orientation: ", mrinfo_orient)
+    if mrinfo == "yes":
+        mrinfo_orient = mrinfo_orientation(image_path)
+        print("MrInfo orientation: ", mrinfo_orient)
 
     # --- Standardiser l'orientation des images affichés (Viser RAS (Right-Anterior-Superior)) ---
     og_orientation = "Nibabel original orientation: ", nib.aff2axcodes(img.affine)
@@ -140,16 +149,42 @@ def view_image(image_path, grayscale):
     axia = data[:, :, initial_z]
 
     # --- Setup de la présentation des images dans leur grille ---
-    # Note: aspect à "auto" semble être le mieux ig pour la visualisation
+
+    # Taille physique des voxels afin d'adapter la résolution des images pour l'affichage
+    voxel_size_x, voxel_size_y, voxel_size_z = img_ras.header.get_zooms()[:3]
+
+    # Sagittale : Y-Z
+    sag_extent = [
+        0,
+        data.shape[1] * voxel_size_y,
+        0,
+        data.shape[2] * voxel_size_z
+    ]
+
+    # Coronale : X-Z
+    coro_extent = [
+        0,
+        data.shape[0] * voxel_size_x,
+        0,
+        data.shape[2] * voxel_size_z
+    ]
+
+    # Axiale : X-Y
+    axia_extent = [
+        0,
+        data.shape[0] * voxel_size_x,
+        0,
+        data.shape[1] * voxel_size_y
+    ]
 
     if grayscale == "yes":
-        sag_img = pos_img_sag.imshow(sag, aspect="auto", cmap="gray", origin="lower")
-        coro_img = pos_img_coro.imshow(coro, aspect="auto", cmap="gray", origin="lower")
-        axia_img = pos_img_axia.imshow(axia, aspect="auto", cmap="gray", origin="lower")
+        sag_img = pos_img_sag.imshow(sag, aspect="equal", cmap="gray", origin="lower", extent=sag_extent, interpolation="none")
+        coro_img = pos_img_coro.imshow(coro, aspect="equal", cmap="gray", origin="lower", extent=coro_extent, interpolation="none")
+        axia_img = pos_img_axia.imshow(axia, aspect="equal", cmap="gray", origin="lower", extent=axia_extent, interpolation="none")
     else:
-        sag_img = pos_img_sag.imshow(sag, aspect="auto")
-        coro_img = pos_img_coro.imshow(coro, aspect="auto")
-        axia_img = pos_img_axia.imshow(axia, aspect="auto")
+        sag_img = pos_img_sag.imshow(sag, aspect="equal", origin="lower", extent=sag_extent, interpolation="none")
+        coro_img = pos_img_coro.imshow(coro, aspect="equal", origin="lower", extent=coro_extent, interpolation="none")
+        axia_img = pos_img_axia.imshow(axia, aspect="equal", origin="lower",  extent=axia_extent, interpolation="none")
 
 
     # --- Titres des graphs et modifications des affichages ---
