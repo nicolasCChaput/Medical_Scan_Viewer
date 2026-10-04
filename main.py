@@ -27,7 +27,8 @@ def main():
     parser_view = subparsers.add_parser(
         "view",
         help="Display an image"
-        )
+    )
+
     parser_view.add_argument(
         "--image",
         required=True,
@@ -59,6 +60,7 @@ def main():
         "projection",
         help="Compute MIP or MinIP"
     )
+
     parser_proj.add_argument(
         "--image",
         required=True
@@ -105,6 +107,29 @@ def main():
         "--image",
         required=True
     )
+    parser_denoise.add_argument(
+        "--method",
+        choices=["nlmeans"],
+        default="nlmeans"
+    )
+    parser_denoise.add_argument(
+        "--patch_size",
+        type=int,
+        default=5,
+        help="Taille des patches comparés"
+    )
+    parser_denoise.add_argument(
+        "--patch_distance",
+        type=int,
+        default=6,
+        help="Rayon de recherche des patches"
+    )
+    parser_denoise.add_argument(
+        "--str",
+        type=float,
+        default=0.8,
+        help="Force du débruitage"
+    )
 
     args = parser.parse_args()
 
@@ -127,7 +152,13 @@ def main():
         show_stats(args.image)
 
     elif args.command == "denoise":
-        denoise_image(args.image)
+        denoise_image(
+            args.image,
+            args.method,
+            args.patch_size,
+            args.patch_distance,
+            args.h
+        )
 
 
 if __name__ == "__main__":
