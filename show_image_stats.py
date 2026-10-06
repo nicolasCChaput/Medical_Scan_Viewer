@@ -117,13 +117,13 @@ def show_stats(image_path):
     # Recherche de la taille des voxels
     if img is not None:
         voxel_sizes = img.header.get_zooms()[:3]
-        voxel_str = (
+        voxel_sizes_string = (
             f"{voxel_sizes[0]:.3f} x "
             f"{voxel_sizes[1]:.3f} x "
             f"{voxel_sizes[2]:.3f} mm"
         )
     else:
-        voxel_str = "N/A"
+        voxel_sizes_string = "N/A"
 
     Cm = contraste_de_michelson(image_path)
 
@@ -139,7 +139,7 @@ def show_stats(image_path):
     print("=" * 70)
     stats = [
         ("Dimensions", f"{dimensions} voxels"),
-        ("Voxel size", voxel_str),
+        ("Voxel size", voxel_sizes_string),
         ("Min intensity", f"{np.min(data):.3f}"),
         ("Max intensity", f"{np.max(data):.3f}"),
         ("Mean intensity", f"{np.mean(data):.3f}"),
