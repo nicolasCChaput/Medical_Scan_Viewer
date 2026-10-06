@@ -95,7 +95,7 @@ def histogram(image_path):
     plt.figure(figsize=(8, 5))
     plt.hist(
         values,
-        bins=256,
+        bins=512,
         color="steelblue"
     )
 
