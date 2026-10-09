@@ -1,6 +1,6 @@
 """
 show_image_stats.py
-...
+[...]
 
 Arguments
 --image (REQUIS): Chemin vers les images à analyser. ("path/to/image.abc")
@@ -17,7 +17,7 @@ from pathlib import Path
 from utils import load_image
 
 def contraste_de_michelson(image_path):
-    # Selon les notes de cours:
+    # Selon les notes de cours :
     #   Cm = (Imax - Imin) / (Imax + Imin)
 
     # Chercher les informations des images
