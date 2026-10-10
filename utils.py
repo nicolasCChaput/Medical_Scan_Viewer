@@ -1,7 +1,15 @@
 """
 utils.py
-[...]
 
+Fonctions utilitaires utilisées dans les différents scripts du TP1.
+Permet principalement le chargement des images médicales et des images
+2D selon leur format de fichier.
+
+Formats supportés :
+    - .nii : Images NIfTI via nibabel
+    - .pgm : Images PGM via scikit-image
+
+Auteur: Nicolas Claveau-Chaput
 """
 
 from pathlib import Path

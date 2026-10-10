@@ -1,14 +1,24 @@
 """
 view_image.py
-Ouvre un viewer générique de fichier de format .nii (nifti). Est utiliser avec l'argument "view".
+
+Ouvre un viewer interactif pour l'exploration de volumes médicaux au
+format NIfTI. Permet l'affichage simultané des coupes sagittales,
+coronales et axiales ainsi que la validation de l'orientation des
+images avec Nibabel et MrInfo.
 
 Arguments
---image (REQUIS): Chemin vers les images à analyser dans le viewer. ("path/to/image.nii")
---grayscale: Affiche l'image en niveaux de gris. (Choix possibles: yes -> affichage noir et blanc | no -> palette de couleurs par défaut )
---mrinfo: Fait les appels nécessaire pour voir les information de mrinfo sur l'orientation. (Choix possibles: yes -> fait les appels à mrinfo | no -> ne fait pas les appels à mrinfo )
+--image (REQUIS): Chemin vers les images à analyser dans le viewer.
+                  ("path/to/image.nii")
+--grayscale: Affiche l'image en niveaux de gris.
+              (Choix possibles: yes -> affichage noir et blanc | no -> palette de couleurs par défaut)
+--mrinfo: Fait les appels nécessaires pour voir les informations
+          d'orientation via MrInfo.
+          (Choix possibles: yes -> fait les appels à MrInfo | no -> ne fait pas les appels à MrInfo)
 
 Exemple d'usage:
     python main.py view --image "C:path/to/Data_TP1/Data_TP0/IRM/Brain/flair.nii" --grayscale yes --mrinfo yes
+
+Auteur: Nicolas Claveau-Chaput
 """
 
 import numpy as np

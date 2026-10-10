@@ -1,12 +1,29 @@
 """
 show_image_stats.py
-[...]
+
+Calcule et affiche différentes statistiques descriptives sur une image
+médicale ainsi que son histogramme d'intensité.
+
+Les statistiques calculées comprennent :
+    - Les dimensions de l'image
+    - La taille des voxels
+    - Les intensités minimale, maximale et moyenne
+    - L'écart-type des intensités
+    - Le contraste de Michelson
+    - Le contraste RMS
+    - Le rapport signal sur bruit (SNR)
+    - Le rapport signal sur bruit sans le fond (SNR)
+
+Un histogramme des intensités est également généré afin de faciliter
+l'analyse du bruit et de la distribution des valeurs de l'image.
 
 Arguments
 --image (REQUIS): Chemin vers les images à analyser. ("path/to/image.abc")
 
 Exemple d'usage:
     python main.py stats --image "C:path/to/Data_TP1/Data_TP0/IRM/Brain/flair.nii"
+
+Auteur: Nicolas Claveau-Chaput
 """
 
 import numpy as np
