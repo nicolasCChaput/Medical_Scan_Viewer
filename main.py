@@ -1,6 +1,19 @@
 """
 main.py
-Gestionnaire du argparser. [...]
+
+Gestionnaire du argparser.
+
+Ce fichier agit comme point d'entrée principal du projet et permet
+d'accéder aux différentes fonctionnalités développées dans le cadre
+du TP1.
+
+Sous-commandes disponibles :
+    view        : Affichage d'images médicales
+    projection  : Calcul de projections MIP et MinIP
+    stats       : Calcul de statistiques d'images
+    denoise     : Application de méthodes de débruitage
+
+Auteur: Nicolas Claveau-Chaput
 """
 
 import argparse
@@ -114,6 +127,12 @@ def main():
 
     # NLMeans
     parser_denoise.add_argument(
+        "--h",
+        type=float,
+        default=2,
+        help="NLMeans - Force du débruitage"
+    )
+    parser_denoise.add_argument(
         "--patch_size",
         type=int,
         default=5,
@@ -122,34 +141,16 @@ def main():
     parser_denoise.add_argument(
         "--patch_distance",
         type=int,
-        default=6,
+        default=15,
         help="NLMeans - Rayon de recherche des patches"
     )
-    parser_denoise.add_argument(
-        "--str",
-        type=float,
-        default=0.8,
-        help="NLMeans - Force du débruitage"
-    )
-    parser_denoise.add_argument(
-        "--h",
-        type=float,
-        default=0.8,
-        help="NLMeans - Force du débruitage NL-Means"
-    )
+
     # Diffusion anisotrope
     parser_denoise.add_argument(
-        "--niter",
+        "--nbre_iter",
         type=int,
         default=10,
         help="Anisotrope - Nombre d'itérations de diffusion"
-    )
-
-    parser_denoise.add_argument(
-        "--kappa",
-        type=float,
-        default=50,
-        help="Anisotrope - Seuil de préservation des contours"
     )
 
     parser_denoise.add_argument(
@@ -170,7 +171,7 @@ def main():
     parser_denoise.add_argument(
         "--sigma_spatial",
         type=float,
-        default=15,
+        default=12,
         help="Bilateral - Étendue spatiale du filtre bilateral"
     )
     # --- Fin denoise_image.py ---
@@ -205,13 +206,12 @@ def main():
 
             # NLMean
             args.method,
+            args.h,
             args.patch_size,
             args.patch_distance,
-            args.h,
 
             # Anisotrope
-            args.niter,
-            args.kappa,
+            args.nbre_iter,
             args.gamma,
 
             # Bilateral
