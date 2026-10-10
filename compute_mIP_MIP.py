@@ -1,15 +1,23 @@
 """
 compute_mIP_MIP.py
-Calcule et affiche la projection d’intensité minimale (mIP) ou maximale (MIP) de fichier nifti exclusivement selon des entrées d'axes (x, y, z) et du mode (max, min).
+
+Calcule et affiche la projection d’intensité minimale (mIP) ou maximale
+(MIP) de fichiers NIfTI selon un axe sélectionné.
 
 Arguments
---image (REQUIS): Chemin vers les images à analyser dans le viewer. ("path/to/image.nii")
---axis: Axe selon lequel la projection est calculée. (Choix possibles: x -> axe sagittal | y -> axe coronal | z -> axe axial )
---mode: Type de projection à effectuer. (Choix possibles: max -> Maximum Intensity Projection (mip) | min -> Minimum Intensity Projection (min-ip) )
---grayscale: Affiche l'image en niveaux de gris. (Choix possibles: yes -> affichage noir et blanc | no -> palette de couleurs par défaut )
+--image (REQUIS): Chemin vers les images à analyser dans le viewer.
+                  ("path/to/image.nii")
+--axis: Axe selon lequel la projection est calculée.
+         (Choix possibles: x -> axe sagittal | y -> axe coronal | z -> axe axial)
+--mode: Type de projection à effectuer.
+         (Choix possibles: max -> Maximum Intensity Projection (MIP) | min -> Minimum Intensity Projection (MinIP))
+--grayscale: Affiche l'image en niveaux de gris.
+              (Choix possibles: yes -> affichage noir et blanc | no -> palette de couleurs par défaut)
 
 Exemple d'usage:
     python main.py projection --image "C:path/to/Data_TP1/Data_TP0/IRM/Brain/flair.nii" --axis x --mode max --grayscale yes
+
+Auteur: Nicolas Claveau-Chaput
 """
 
 import numpy as np

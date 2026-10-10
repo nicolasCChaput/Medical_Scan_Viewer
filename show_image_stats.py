@@ -1,12 +1,29 @@
 """
 show_image_stats.py
-...
+
+Calcule et affiche différentes statistiques descriptives sur une image
+médicale ainsi que son histogramme d'intensité.
+
+Les statistiques calculées comprennent :
+    - Les dimensions de l'image
+    - La taille des voxels
+    - Les intensités minimale, maximale et moyenne
+    - L'écart-type des intensités
+    - Le contraste de Michelson
+    - Le contraste RMS
+    - Le rapport signal sur bruit (SNR)
+    - Le rapport signal sur bruit sans le fond (SNR)
+
+Un histogramme des intensités est également généré afin de faciliter
+l'analyse du bruit et de la distribution des valeurs de l'image.
 
 Arguments
 --image (REQUIS): Chemin vers les images à analyser. ("path/to/image.abc")
 
 Exemple d'usage:
     python main.py stats --image "C:path/to/Data_TP1/Data_TP0/IRM/Brain/flair.nii"
+
+Auteur: Nicolas Claveau-Chaput
 """
 
 import numpy as np
@@ -17,7 +34,7 @@ from pathlib import Path
 from utils import load_image
 
 def contraste_de_michelson(image_path):
-    # Selon les notes de cours:
+    # Selon les notes de cours :
     #   Cm = (Imax - Imin) / (Imax + Imin)
 
     # Chercher les informations des images
@@ -95,7 +112,7 @@ def histogram(image_path):
     plt.figure(figsize=(8, 5))
     plt.hist(
         values,
-        bins=256,
+        bins=512,
         color="steelblue"
     )
 
@@ -117,13 +134,13 @@ def show_stats(image_path):
     # Recherche de la taille des voxels
     if img is not None:
         voxel_sizes = img.header.get_zooms()[:3]
-        voxel_str = (
+        voxel_sizes_string = (
             f"{voxel_sizes[0]:.3f} x "
             f"{voxel_sizes[1]:.3f} x "
             f"{voxel_sizes[2]:.3f} mm"
         )
     else:
-        voxel_str = "N/A"
+        voxel_sizes_string = "N/A"
 
     Cm = contraste_de_michelson(image_path)
 
@@ -139,7 +156,7 @@ def show_stats(image_path):
     print("=" * 70)
     stats = [
         ("Dimensions", f"{dimensions} voxels"),
-        ("Voxel size", voxel_str),
+        ("Voxel size", voxel_sizes_string),
         ("Min intensity", f"{np.min(data):.3f}"),
         ("Max intensity", f"{np.max(data):.3f}"),
         ("Mean intensity", f"{np.mean(data):.3f}"),

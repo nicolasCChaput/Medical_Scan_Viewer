@@ -1,14 +1,24 @@
 """
 view_image.py
-Ouvre un viewer générique de fichier de format .nii (nifti). Est utiliser avec l'argument "view".
+
+Ouvre un viewer interactif pour l'exploration de volumes médicaux au
+format NIfTI. Permet l'affichage simultané des coupes sagittales,
+coronales et axiales ainsi que la validation de l'orientation des
+images avec Nibabel et MrInfo.
 
 Arguments
---image (REQUIS): Chemin vers les images à analyser dans le viewer. ("path/to/image.nii")
---grayscale: Affiche l'image en niveaux de gris. (Choix possibles: yes -> affichage noir et blanc | no -> palette de couleurs par défaut )
---mrinfo: Fait les appels nécessaire pour voir les information de mrinfo sur l'orientation. (Choix possibles: yes -> fait les appels à mrinfo | no -> ne fait pas les appels à mrinfo )
+--image (REQUIS): Chemin vers les images à analyser dans le viewer.
+                  ("path/to/image.nii")
+--grayscale: Affiche l'image en niveaux de gris.
+              (Choix possibles: yes -> affichage noir et blanc | no -> palette de couleurs par défaut)
+--mrinfo: Fait les appels nécessaires pour voir les informations
+          d'orientation via MrInfo.
+          (Choix possibles: yes -> fait les appels à MrInfo | no -> ne fait pas les appels à MrInfo)
 
 Exemple d'usage:
     python main.py view --image "C:path/to/Data_TP1/Data_TP0/IRM/Brain/flair.nii" --grayscale yes --mrinfo yes
+
+Auteur: Nicolas Claveau-Chaput
 """
 
 import numpy as np
@@ -22,6 +32,16 @@ from matplotlib.widgets import Slider
 from utils import load_image
 
 def mrinfo_orientation(image_path):
+
+    # Exemple:
+    # | 0  -1   0  12| -> Axe des X
+    # | 1   0   0  34| -> Axe des Y
+    # | 0   0   1  56| -> Axe des Z
+    # | 0   0   0   1|
+    #
+    # Si on prend l'axe des x, on voit que le terme dominant est 1 qui indique une direction pointé dans l'axe de y.
+    # Si cette direction est positive, elle pointe vers la droite (R), si elle est négative, elle pointe vers la gauche (L)
+    # Ici, pour -1, c'est Left.
 
     # Modifier au besoin, nécessaire pour windows
     mrinfo_exe = r"C:\msys64\mingw64\bin\mrinfo.exe"
@@ -66,17 +86,17 @@ def mrinfo_orientation(image_path):
         # print(dominant_term)
         # print(sign)
 
-        # Info sur l'interpretation des orientations: http://www.grahamwideman.com/gw/brain/orientation/orientterms.htm
+        # Info sur l'interprétation des orientations: http://www.grahamwideman.com/gw/brain/orientation/orientterms.htm
 
-        # X -> R ou L
+        # Axe des X -> positif = Right | négatif = Left
         if dominant_term == 0:
             orientation += "R" if sign > 0 else "L"
 
-        # Y -> A ou P
+        # Axe des Y -> positif = Anterior | négatif = Posterior
         elif dominant_term == 1:
             orientation += "A" if sign > 0 else "P"
 
-        # Z -> S ou I
+        # Axe des Z -> positif = Superior | négatif = Inferior
         elif dominant_term == 2:
             orientation += "S" if sign > 0 else "I"
 
