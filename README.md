@@ -46,5 +46,5 @@ pip install -r requirements.txt
 ```
 
 ## Screenshot
-![viewer.png](../../../Downloads/viewer.png)
-![falirnlmeanshauth.png](../../../Downloads/falirnlmeanshauth.png)
+<img width="1500" height="500" alt="viewer" src="https://github.com/user-attachments/assets/00f20ab9-6b08-4f2a-968d-9a533c159103" />
+<img width="1500" height="500" alt="flairnlmeansbash" src="https://github.com/user-attachments/assets/3ab9344b-6145-47c3-ab5a-1d11fa838005" />
